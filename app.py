@@ -226,37 +226,38 @@ async def stream_response(request:Request):
             responses = responses + f"answer {i+1}: "+ "".join(response_augmenter["answer"][i]) + "source: "+ response_augmenter["source"][i] +"\n"
         print("my responses**********")
         print(responses)
-        genai_prompt = f"You are a knowledge worker.  You received the following question:\n{query}\n"
-        genai_prompt2 = f"these are the answers from the knowledge retriever:\n {responses}\n"
-        genai_prompt3_1 = """\n For example. The User asks the following question: 
-        'tell me about green juice'; 
-        the expected answer: 
-        ' Our green juice is the WELL GREENS because of its name.  This are the details  on this particular juice - A 6-pack priced at $41.94, with ingredients including apple juice, spinach juice, kale juice, celery juice, lemon juice, and ginger juice 120 calories.'"""
+        genai_prompt = f"""You are a conversational AI assistant tasked with answering customer inquiries clearly, accurately, and in a concise, friendly tone suitable for a phone conversation. 
+        You have access to a retrieval system with responses from a pre-approved database to support your answers.
+        Here is the customer question:
+
+        Customer Inquiry:
+        {query}
+
+        When responding, ensure you:
+        - Address the question directly and focus only on the customer's specific concern.
+        - Include key details, such as product names, descriptions, benefits, ingredients, or prices, if relevant.
+        - Use a helpful, warm tone that feels supportive and directly addresses the customer's needs.
+
+        Specific guidance:
+        - If asked about a product, provide ingredients, calorie content, and key benefits.
+        - For questions on payments or shipping, offer clear instructions.
+        - For questions about the company, briefly share values or product categories.
+        - For complaints or issues (e.g., expired products), offer solutions like refunds, replacements, or direct escalation to a specialist when needed."""
+
+        genai_prompt2 = f"""Refer to the following knowledge retrieval responses to help answer the customer's question. Select the most relevant and fact-based information:
+        Knowledge Retrieval Responses:
+        {responses}
+        Pick only the best details to directly answer the customer's question clearly and accurately."""
+
+        genai_prompt3_1 = """Example: If a customer asks, 'Tell me about green juice,' your response should be:
+        'Our green juice, Well Greens, comes in a 6-pack for $41.94. It contains apple, spinach, kale, celery, lemon, and ginger juices, with 120 calories per serving.'"""
+
+        genai_prompt3 = f"""{prompt}\n Only state the answer—do not include response numbers or extra commentary. 
+        Be concise, factual, and avoid adding information beyond what is given. 
+        If the answer is unavailable, say, 'I don't have that information at the moment.'"""
         
-        genai_prompt4 = f"""
-            You are an AI assistant responsible for answering customer queries accurately and efficiently. You have access to a knowledge retrieval system that provides answers based on a database of pre-approved responses. 
 
-            Your task is to respond to the following customer inquiry:
-            Customer Inquiry:
-
-            Consider the following details when crafting your response:
-            - Ensure the response is clear, informative, and addresses the customer's specific question or concern.
-            - If the query is about a product, include details like product name, description, benefits, ingredients, pricing, and any other relevant specifications.
-            - If the query is about a service or general information, provide clear and concise details about the service, its features, or how to proceed with it.
-            - Use an empathetic and helpful tone. Make sure the response feels personalized and offers useful insights, solutions, or next steps.
-
-            Be mindful of the following:
-            - If the query asks for a product’s nutritional information, provide specific ingredients, calories, and any additional details on benefits.
-            - If the query is about payment or shipping, ensure the response is clear, addressing the process and providing any relevant instructions.
-            - If the customer asks for more general information about your company, focus on values, mission, or product ranges.
-            - If the query is about an issue (e.g., expired products, poor service), offer clear solutions such as refunds, replacements, or escalation to specialists if needed.
-
-            Now, use the following responses from the knowledge retriever as a guide to help you craft your response:"""
-
-        genai_prompt3 = f"{prompt}\n Answer only with the retrieved facts, don't make up an answer. If you don't know the answer - say that you don't know the answer."
-        
-
-        new_prompt = genai_prompt+genai_prompt2+genai_prompt3_1+genai_prompt3+genai_prompt4
+        new_prompt = genai_prompt+genai_prompt2+genai_prompt3_1+genai_prompt3
 
         return StreamingResponse(event_stream (model, new_prompt, ""), media_type="text/event-stream")
         
