@@ -251,7 +251,7 @@ async def stream_response(request:Request):
             - If the customer asks for more general information about your company, focus on values, mission, or product ranges.
             - If the query is about an issue (e.g., expired products, poor service), offer clear solutions such as refunds, replacements, or escalation to specialists if needed.
 
-            Now, use the following responses from the knowledge retriever as a guide to help you craft your response:'''
+            Now, use the following responses from the knowledge retriever as a guide to help you craft your response:"""
 
         genai_prompt3 = f"{prompt}\n Answer only with the retrieved facts, don't make up an answer. If you don't know the answer - say that you don't know the answer."
         
